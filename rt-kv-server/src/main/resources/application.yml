@@ -1,0 +1,10 @@
+kv:
+  node-id: n1  # 集群跑别的服务时候这个要改为n2,n3对应的
+  data-dir: ./data/n1 # 集群跑别的服务时候这个要改为n2,n3对应的
+  peers:
+    - id: n1
+      address: localhost:8081
+    - id: n2
+      address: localhost:8082
+    - id: n3
+      address: localhost:8083

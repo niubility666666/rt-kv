@@ -1,0 +1,8 @@
+kv:
+  peers:
+    - id: n1
+      address: localhost:8081
+    - id: n2
+      address: localhost:8082
+    - id: n3
+      address: localhost:8083
