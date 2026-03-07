@@ -1,173 +1,85 @@
 # rt-kv
 
-一个 **基于 Apache Ratis (Raft 协议) 实现的轻量级分布式 Key-Value 存储系统**，使用 Java + Maven 构建，适合作为：
+`rt-kv` 是一个基于 Apache Ratis（Raft 协议）的轻量级分布式 Key-Value 存储系统，使用 Java + Maven 多模块构建。
 
-* 分布式系统 / Raft 协议学习项目
-* 简化版 KV 存储原型
-* 中小规模配置、元数据存储
+## 项目定位
 
----
+- 分布式系统 / Raft 协议学习项目
+- 简化版 KV 存储原型
+- 中小规模配置、元数据存储场景
 
-## ✨ 项目特性
+## 核心特性
 
-* ✅ **基于 Raft 共识协议**（Apache Ratis）
-* ✅ 支持 **多节点一致性复制**
-* ✅ 可插拔的 **KV 状态机（StateMachine）**
-* ✅ 本地文件持久化日志（Log Storage）
-* ✅ 清晰的 Client / Server 架构
-* ✅ 使用 Maven 构建，易于二次开发
+- 基于 Raft 共识协议（Apache Ratis）
+- 支持多节点一致性复制
+- 可插拔 KV 状态机（StateMachine）
+- 本地文件持久化存储
+- 清晰的 Client / Server / App 分层
+- 新增 Common 协议层，统一命令格式与 GroupId
 
----
-
-## 🧱 项目结构
+## 模块结构
 
 ```text
 rt-kv
-├── pom.xml                    # Maven 配置
-├── rt-kv-client               # KV 客户端模块
-│   └── KvClient.java
-├── rt-kv-server               # KV 服务端模块
-│   ├── RaftServerBootstrap    # Raft Server 启动类
-│   ├── machine/
-│   │   └── KvStateMachine     # Raft 状态机实现
-│   ├── storage/
-│   │   ├── KvStorage          # KV 存储接口
-│   │   └── FileLogStorage     # 基于文件的存储实现
-│   └── config/
-│       └── KvConfig           # 节点与 Raft 配置
-└── resources/
-    └── application.yml        # 服务端配置文件
+├── rt-kv-common    # 协议与共享常量
+├── rt-kv-server    # Raft 节点服务
+├── rt-kv-client    # Java 客户端 SDK
+└── rt-kv-app       # HTTP 网关示例应用
 ```
 
----
+## 关键优化（本次）
 
-## ⚙️ 技术栈
+- 修复 client/server `RaftGroupId` 不一致问题
+- 修复 `DELETE` 使用只读请求的问题（改为写请求）
+- 抽离统一命令协议（`KvCommand` + `KvCommandCodec`）
+- StateMachine 区分写路径（`applyTransaction`）与读路径（`query`）
+- 文件存储 key 改为 Base64 文件名，避免非法字符与路径风险
+- 增加 service 层，controller 只负责 HTTP 映射
+- 补齐核心类和方法 Javadoc 注释
 
-* **Java 17+**（推荐 JDK 21）
-* **Apache Ratis**（Raft 协议实现）
-* **Maven**
-* **YAML** 配置
-
----
-
-## 🚀 快速开始
-
-### 1️⃣ 构建项目
+## 构建
 
 ```bash
+mvn clean test
 mvn clean package -DskipTests
 ```
 
----
+## 启动示例
 
-### 2️⃣ 启动 KV Server（示例：3 节点）
-
-分别在不同终端或机器上启动：
+启动 3 个 server 节点（分别修改 `kv.node-id` 与 `kv.data-dir`）：
 
 ```bash
-java -jar rt-kv-server/target/rt-kv-server.jar \
-  --nodeId n1 \
-  --port 8081
+java -jar rt-kv-server/target/rt-kv-server.jar --spring.config.location=classpath:/application.yml
 ```
+
+启动 app：
 
 ```bash
-java -jar rt-kv-server/target/rt-kv-server.jar \
-  --nodeId n2 \
-  --port 8082
+java -jar rt-kv-app/target/rt-kv-app.jar
 ```
+
+## HTTP API（rt-kv-app）
+
+- 写入: `POST /kv/{key}`，Body 为 value 文本
+- 读取: `GET /kv/{key}`
+- 删除: `DELETE /kv/{key}`
+
+示例：
 
 ```bash
-java -jar rt-kv-server/target/rt-kv-server.jar \
-  --nodeId n3 \
-  --port 8083
+curl -X POST "http://localhost:8080/kv/user:1" -d "Tom"
+curl "http://localhost:8080/kv/user:1"
+curl -X DELETE "http://localhost:8080/kv/user:1"
 ```
 
-> ⚠️ 节点信息需与 `application.yml` 中的 Raft Group 配置一致
+## Roadmap
 
----
+- Snapshot 支持
+- Watch 机制
+- gRPC API
+- RocksDB 存储后端
+- 集群动态扩缩容
 
-### 3️⃣ 使用客户端读写数据
+## License
 
-```java
-KvClient client = new KvClient("localhost:8081");
-
-client.put("name", "rt-kv");
-String value = client.get("name");
-System.out.println(value);
-```
-
----
-
-## 🧠 核心设计说明
-
-### Raft 状态机（KvStateMachine）
-
-* 所有 **PUT / DELETE** 操作通过 Raft Log 复制
-* Leader 提交后由 StateMachine apply
-* 保证多节点 KV 数据强一致
-
-### 存储层设计
-
-```java
-interface KvStorage {
-    void put(String key, String value);
-    String get(String key);
-}
-```
-
-当前实现：
-
-* `FileLogStorage`：基于本地文件持久化
-
-可扩展为：
-
-* RocksDB
-* LevelDB
-* 内存 + Snapshot
-
----
-
-## 📌 适合学习的知识点
-
-* Raft 协议核心流程（Leader / Follower / Log Replication）
-* Apache Ratis 使用方式
-* 分布式一致性 KV 设计
-* StateMachine + Log Storage 解耦
-* 分布式系统启动与配置管理
-
----
-
-## 🛣️ Roadmap
-
-* [ ] 支持 Snapshot
-* [ ] 支持 Watch / 监听机制
-* [ ] HTTP / gRPC API
-* [ ] RocksDB 存储引擎
-* [ ] 集群动态扩缩容
-* [ ] Spring Boot Starter 封装
-
----
-
-## 🤝 贡献指南
-
-欢迎 Issue / PR：
-
-1. Fork 本仓库
-2. 新建分支：`feature/xxx`
-3. 提交代码
-4. 发起 Pull Request
-
----
-
-## 📄 License
-
-MIT License
-
----
-
-## 🙋 作者
-
-* GitHub: **niubility666666**
-* 项目目的：学习 & 分享分布式存储实现原理
-
-如果这个项目对你有帮助，欢迎 ⭐ Star 支持！
+MIT
