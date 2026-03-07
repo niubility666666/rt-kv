@@ -7,9 +7,9 @@ import java.nio.file.Path;
 import java.util.Base64;
 
 /**
- * File-based implementation of {@link KvStorage}.
+ * 基于文件系统的 {@link KvStorage} 实现。
  *
- * <p>Each key is mapped to a Base64 file name under a dedicated directory.
+ * <p>每个键会映射为数据目录下的 Base64 文件名。
  */
 public class FileLogStorage implements KvStorage {
 
@@ -19,10 +19,10 @@ public class FileLogStorage implements KvStorage {
     private final Path dir;
 
     /**
-     * Creates storage under the provided directory.
+     * 在指定目录下创建存储实例。
      *
-     * @param dir data directory
-     * @throws IOException when directory cannot be created
+     * @param dir 数据目录
+     * @throws IOException 目录创建失败时抛出
      */
     public FileLogStorage(Path dir) throws IOException {
         this.dir = dir;
@@ -69,10 +69,10 @@ public class FileLogStorage implements KvStorage {
     }
 
     /**
-     * Converts a user key into a safe local file path.
+     * 将用户键转换为安全的本地文件路径。
      *
-     * @param key logical key name
-     * @return physical file path
+     * @param key 逻辑键名
+     * @return 物理文件路径
      */
     private Path resolveKeyFile(String key) {
         if (key == null || key.isBlank()) {

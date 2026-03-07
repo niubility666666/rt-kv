@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link KvCommandCodec}.
+ * {@link KvCommandCodec} 的单元测试。
  */
 class KvCommandCodecTest {
 
     /**
-     * Verifies round trip for put command.
+     * 验证 PUT 命令的编解码往返一致性。
      */
     @Test
     void shouldEncodeAndDecodePut() {
@@ -24,7 +24,7 @@ class KvCommandCodecTest {
     }
 
     /**
-     * Verifies invalid payload is rejected.
+     * 验证非法载荷会被拒绝。
      */
     @Test
     void shouldRejectInvalidPayload() {

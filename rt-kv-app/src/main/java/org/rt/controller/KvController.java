@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 /**
- * HTTP entrypoint for key-value operations.
+ * 键值操作的 HTTP 接口入口。
  */
 @RestController
 @RequestMapping("/kv")
@@ -21,20 +21,20 @@ public class KvController {
     private final KvService kvService;
 
     /**
-     * Creates controller instance.
+     * 创建控制器实例。
      *
-     * @param kvService kv service
+     * @param kvService KV 服务
      */
     public KvController(KvService kvService) {
         this.kvService = kvService;
     }
 
     /**
-     * Stores a key-value pair.
+     * 写入一个键值对。
      *
-     * @param key key name
-     * @param value value content in request body
-     * @throws IOException when write fails
+     * @param key 键名
+     * @param value 请求体中的值内容
+     * @throws IOException 写入失败时抛出
      */
     @PostMapping("/{key}")
     public void put(@PathVariable String key, @RequestBody String value) throws IOException {
@@ -42,11 +42,11 @@ public class KvController {
     }
 
     /**
-     * Reads value by key.
+     * 按键读取值。
      *
-     * @param key key name
-     * @return stored value
-     * @throws IOException when read fails
+     * @param key 键名
+     * @return 存储的值
+     * @throws IOException 读取失败时抛出
      */
     @GetMapping("/{key}")
     public String get(@PathVariable String key) throws IOException {
@@ -54,11 +54,11 @@ public class KvController {
     }
 
     /**
-     * Deletes a key.
+     * 删除一个键。
      *
-     * @param key key name
-     * @return true when key is removed
-     * @throws IOException when delete fails
+     * @param key 键名
+     * @return 删除成功时返回 true
+     * @throws IOException 删除失败时抛出
      */
     @DeleteMapping("/{key}")
     public boolean delete(@PathVariable String key) throws IOException {

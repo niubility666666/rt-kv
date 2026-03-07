@@ -15,16 +15,16 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Thin Raft client wrapper for key-value operations.
+ * 面向键值操作的轻量 Raft 客户端封装。
  */
 public class KvClient implements Closeable {
 
     private final RaftClient client;
 
     /**
-     * Creates a client connected to the configured Raft peer set.
+     * 创建连接到指定 Raft 节点集合的客户端。
      *
-     * @param peers raft peer list
+     * @param peers Raft 节点列表
      */
     public KvClient(List<RaftPeer> peers) {
         RaftGroup group = RaftGroup.valueOf(
@@ -38,22 +38,22 @@ public class KvClient implements Closeable {
     }
 
     /**
-     * Writes a key-value pair through Raft replication.
+     * 通过 Raft 复制链路写入键值对。
      *
-     * @param key key name
-     * @param value value content
-     * @throws IOException when rpc fails
+     * @param key 键名
+     * @param value 值内容
+     * @throws IOException RPC 调用失败时抛出
      */
     public void put(String key, String value) throws IOException {
         sendWrite(KvCommand.put(key, value));
     }
 
     /**
-     * Reads a value by key using read-only path.
+     * 通过只读路径按键读取值。
      *
-     * @param key key name
-     * @return value content, empty string when key not found
-     * @throws IOException when rpc fails
+     * @param key 键名
+     * @return 对应值；键不存在时返回空字符串
+     * @throws IOException RPC 调用失败时抛出
      */
     public String get(String key) throws IOException {
         RaftClientReply reply = client.io().sendReadOnly(
@@ -63,11 +63,11 @@ public class KvClient implements Closeable {
     }
 
     /**
-     * Deletes a key via replicated write request.
+     * 通过复制写请求删除键。
      *
-     * @param key key name
-     * @return true when key existed and was deleted
-     * @throws IOException when rpc fails
+     * @param key 键名
+     * @return 键存在且删除成功时返回 true
+     * @throws IOException RPC 调用失败时抛出
      */
     public boolean delete(String key) throws IOException {
         String result = sendWrite(KvCommand.delete(key));
@@ -75,9 +75,9 @@ public class KvClient implements Closeable {
     }
 
     /**
-     * Closes underlying Raft client resources.
+     * 关闭底层 Raft 客户端资源。
      *
-     * @throws IOException when close fails
+     * @throws IOException 关闭失败时抛出
      */
     @Override
     public void close() throws IOException {
@@ -85,11 +85,11 @@ public class KvClient implements Closeable {
     }
 
     /**
-     * Sends a state-changing command through replicated write path.
+     * 通过复制写路径发送状态变更命令。
      *
-     * @param command write command
-     * @return response payload from state machine
-     * @throws IOException when rpc fails
+     * @param command 写命令
+     * @return 状态机返回结果
+     * @throws IOException RPC 调用失败时抛出
      */
     private String sendWrite(KvCommand command) throws IOException {
         RaftClientReply reply = client.io().send(Message.valueOf(KvCommandCodec.encode(command)));

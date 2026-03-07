@@ -3,7 +3,7 @@ package org.rt.common.protocol;
 import java.util.Objects;
 
 /**
- * Immutable command object exchanged between client and state machine.
+ * 在客户端与状态机之间传输的不可变命令对象。
  */
 public final class KvCommand {
 
@@ -22,52 +22,52 @@ public final class KvCommand {
     }
 
     /**
-     * Creates a put command.
+     * 创建 PUT 命令。
      *
-     * @param key key name
-     * @param value value content
-     * @return command instance
+     * @param key 键名
+     * @param value 值内容
+     * @return 命令实例
      */
     public static KvCommand put(String key, String value) {
         return new KvCommand(KvCommandType.PUT, key, value);
     }
 
     /**
-     * Creates a get command.
+     * 创建 GET 命令。
      *
-     * @param key key name
-     * @return command instance
+     * @param key 键名
+     * @return 命令实例
      */
     public static KvCommand get(String key) {
         return new KvCommand(KvCommandType.GET, key, null);
     }
 
     /**
-     * Creates a delete command.
+     * 创建 DELETE 命令。
      *
-     * @param key key name
-     * @return command instance
+     * @param key 键名
+     * @return 命令实例
      */
     public static KvCommand delete(String key) {
         return new KvCommand(KvCommandType.DELETE, key, null);
     }
 
     /**
-     * @return command type
+     * @return 命令类型
      */
     public KvCommandType type() {
         return type;
     }
 
     /**
-     * @return command key
+     * @return 命令键
      */
     public String key() {
         return key;
     }
 
     /**
-     * @return command value, available for put command
+     * @return 命令值，仅 PUT 命令有效
      */
     public String value() {
         return value;

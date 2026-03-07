@@ -4,15 +4,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Bootstrap class for the demo http application.
+ * HTTP 示例应用启动入口。
  */
 @SpringBootApplication
 public class KvAppApplication {
 
     /**
-     * Starts the Spring Boot application.
+     * 启动 Spring Boot 应用。
      *
-     * @param args startup arguments
+     * @param args 启动参数
      */
     public static void main(String[] args) {
         SpringApplication.run(KvAppApplication.class, args);

@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Raft state machine that applies replicated kv write operations.
+ * 负责应用复制写请求的 Raft 状态机。
  */
 public class KvStateMachine extends BaseStateMachine {
 
@@ -21,19 +21,19 @@ public class KvStateMachine extends BaseStateMachine {
     private final KvStorage storage;
 
     /**
-     * Creates a state machine instance bound to the provided storage backend.
+     * 创建绑定指定存储实现的状态机实例。
      *
-     * @param storage kv storage implementation
+     * @param storage KV 存储实现
      */
     public KvStateMachine(KvStorage storage) {
         this.storage = storage;
     }
 
     /**
-     * Applies replicated write transactions from Raft logs.
+     * 应用来自 Raft 日志的复制写事务。
      *
-     * @param trx transaction context containing serialized command
-     * @return command execution result
+     * @param trx 包含序列化命令的事务上下文
+     * @return 命令执行结果
      */
     @Override
     public CompletableFuture<Message> applyTransaction(TransactionContext trx) {
@@ -44,10 +44,10 @@ public class KvStateMachine extends BaseStateMachine {
     }
 
     /**
-     * Handles linearizable read-only requests.
+     * 处理线性一致性的只读请求。
      *
-     * @param request serialized get command
-     * @return value payload or empty string when key does not exist
+     * @param request 序列化后的 GET 命令
+     * @return 对应值；键不存在时返回空字符串
      */
     @Override
     public CompletableFuture<Message> query(Message request) {
@@ -63,10 +63,10 @@ public class KvStateMachine extends BaseStateMachine {
     }
 
     /**
-     * Executes put and delete commands against storage.
+     * 在存储层执行 PUT 和 DELETE 命令。
      *
-     * @param command decoded command
-     * @return write result message
+     * @param command 解码后的命令
+     * @return 写操作结果消息
      */
     private Message applyWrite(KvCommand command) {
         return switch (command.type()) {

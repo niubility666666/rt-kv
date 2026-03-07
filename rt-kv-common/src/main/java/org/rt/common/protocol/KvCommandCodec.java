@@ -4,9 +4,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Encodes and decodes {@link KvCommand} into a compact text protocol.
+ * {@link KvCommand} 的紧凑文本协议编解码器。
  *
- * <p>Format:
+ * <p>协议格式：
  * <ul>
  *     <li>PUT\tbase64(key)\tbase64(value)</li>
  *     <li>GET\tbase64(key)</li>
@@ -20,14 +20,14 @@ public final class KvCommandCodec {
     private static final String DELIMITER = "\t";
 
     private KvCommandCodec() {
-        // Utility class.
+        // 工具类不允许实例化。
     }
 
     /**
-     * Encodes a command to protocol text.
+     * 将命令编码为协议文本。
      *
-     * @param command command object
-     * @return serialized command
+     * @param command 命令对象
+     * @return 序列化后的命令文本
      */
     public static String encode(KvCommand command) {
         return switch (command.type()) {
@@ -37,10 +37,10 @@ public final class KvCommandCodec {
     }
 
     /**
-     * Decodes protocol text into command object.
+     * 将协议文本解码为命令对象。
      *
-     * @param payload serialized command
-     * @return command object
+     * @param payload 序列化命令文本
+     * @return 命令对象
      */
     public static KvCommand decode(String payload) {
         if (payload == null || payload.isBlank()) {

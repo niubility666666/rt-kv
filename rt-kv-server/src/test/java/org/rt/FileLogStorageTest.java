@@ -10,20 +10,20 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
- * Unit tests for file-based storage.
+ * 文件存储实现的单元测试。
  */
 class FileLogStorageTest {
 
     /**
-     * Temporary directory managed by JUnit.
+     * JUnit 管理的临时目录。
      */
     @TempDir
     Path tempDir;
 
     /**
-     * Verifies put/get/delete behavior.
+     * 验证 put/get/delete 行为。
      *
-     * @throws Exception when storage initialization fails
+     * @throws Exception 存储初始化失败时抛出
      */
     @Test
     void shouldPutGetDelete() throws Exception {

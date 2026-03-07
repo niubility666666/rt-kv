@@ -1,31 +1,31 @@
 package org.rt.storage;
 
 /**
- * Storage abstraction for key-value state persistence.
+ * 键值状态持久化的存储抽象。
  */
 public interface KvStorage {
 
     /**
-     * Stores or overwrites a key-value pair.
+     * 存储或覆盖一个键值对。
      *
-     * @param key key name
-     * @param value raw value bytes
+     * @param key 键名
+     * @param value 原始值字节数组
      */
     void put(String key, byte[] value);
 
     /**
-     * Reads value bytes by key.
+     * 按键读取值字节数组。
      *
-     * @param key key name
-     * @return value bytes, or {@code null} when key does not exist
+     * @param key 键名
+     * @return 值字节数组；键不存在时返回 {@code null}
      */
     byte[] get(String key);
 
     /**
-     * Deletes a key if it exists.
+     * 删除指定键（若存在）。
      *
-     * @param key key name
-     * @return true when a key is deleted
+     * @param key 键名
+     * @return 删除成功时返回 true
      */
     boolean delete(String key);
 }

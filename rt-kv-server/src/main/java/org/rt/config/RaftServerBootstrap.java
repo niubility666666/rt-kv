@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * Starts and stops the local Raft server with Spring lifecycle hooks.
+ * 通过 Spring 生命周期钩子启动和停止本地 Raft 服务。
  */
 @Component
 public class RaftServerBootstrap implements SmartLifecycle {
@@ -31,16 +31,16 @@ public class RaftServerBootstrap implements SmartLifecycle {
     private volatile RaftServer raftServer;
 
     /**
-     * Creates bootstrap instance.
+     * 创建引导实例。
      *
-     * @param props node and peer configuration
+     * @param props 节点与集群配置
      */
     public RaftServerBootstrap(KvNodeProperties props) {
         this.props = props;
     }
 
     /**
-     * Starts the local Raft server.
+     * 启动本地 Raft 服务。
      */
     @Override
     public void start() {
@@ -59,7 +59,7 @@ public class RaftServerBootstrap implements SmartLifecycle {
     }
 
     /**
-     * Stops the local Raft server.
+     * 停止本地 Raft 服务。
      */
     @Override
     public void stop() {
@@ -79,9 +79,9 @@ public class RaftServerBootstrap implements SmartLifecycle {
     }
 
     /**
-     * Stops server and invokes Spring callback.
+     * 停止服务并回调 Spring 生命周期钩子。
      *
-     * @param callback callback to notify completion
+     * @param callback 停止完成后的回调
      */
     @Override
     public void stop(Runnable callback) {
@@ -90,7 +90,7 @@ public class RaftServerBootstrap implements SmartLifecycle {
     }
 
     /**
-     * @return true when server lifecycle is running
+     * @return 服务生命周期处于运行态时返回 true
      */
     @Override
     public boolean isRunning() {
@@ -99,7 +99,7 @@ public class RaftServerBootstrap implements SmartLifecycle {
     }
 
     /**
-     * @return true so server auto starts with Spring context
+     * @return 返回 true，随 Spring 容器自动启动
      */
     @Override
     public boolean isAutoStartup() {
@@ -107,7 +107,7 @@ public class RaftServerBootstrap implements SmartLifecycle {
     }
 
     /**
-     * @return startup order, max value to start after most beans
+     * @return 启动顺序，最大值表示尽量后启动
      */
     @Override
     public int getPhase() {
@@ -115,10 +115,10 @@ public class RaftServerBootstrap implements SmartLifecycle {
     }
 
     /**
-     * Builds RaftServer from configuration.
+     * 根据配置构建 RaftServer。
      *
-     * @return ready-to-start Raft server
-     * @throws IOException when storage init fails
+     * @return 可直接启动的 RaftServer 实例
+     * @throws IOException 存储初始化失败时抛出
      */
     private RaftServer buildRaftServer() throws IOException {
         RaftPeerId selfId = RaftPeerId.valueOf(props.getNodeId());
@@ -138,10 +138,10 @@ public class RaftServerBootstrap implements SmartLifecycle {
     }
 
     /**
-     * Converts config peers to Ratis peers.
+     * 将配置中的节点信息转换为 Ratis 节点对象。
      *
-     * @param peerConfigs configured peers
-     * @return Ratis peer list
+     * @param peerConfigs 配置文件中的节点列表
+     * @return Ratis 节点列表
      */
     private List<RaftPeer> toRaftPeers(List<KvNodeProperties.Peer> peerConfigs) {
         return peerConfigs.stream()
@@ -153,7 +153,7 @@ public class RaftServerBootstrap implements SmartLifecycle {
     }
 
     /**
-     * Validates required bootstrap properties.
+     * 校验引导启动所需配置。
      */
     private void validateConfiguration() {
         if (props.getNodeId() == null || props.getNodeId().isBlank()) {

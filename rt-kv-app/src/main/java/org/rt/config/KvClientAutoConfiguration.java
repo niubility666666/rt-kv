@@ -9,16 +9,16 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * Auto configuration that exposes {@link KvClient} as Spring bean.
+ * 将 {@link KvClient} 装配为 Spring Bean 的自动配置。
  */
 @Configuration
 public class KvClientAutoConfiguration {
 
     /**
-     * Builds a singleton kv client from configured peer list.
+     * 根据配置节点列表构建单例 KV 客户端。
      *
-     * @param props peer properties
-     * @return kv client bean
+     * @param props 节点配置属性
+     * @return KV 客户端 Bean
      */
     @Bean(destroyMethod = "close")
     public KvClient kvClient(KvClientProperties props) {
@@ -27,10 +27,10 @@ public class KvClientAutoConfiguration {
     }
 
     /**
-     * Converts application peers to Ratis peers.
+     * 将应用配置节点转换为 Ratis 节点对象。
      *
-     * @param props client properties
-     * @return raft peers
+     * @param props 客户端配置属性
+     * @return Raft 节点列表
      */
     private List<RaftPeer> toRaftPeers(KvClientProperties props) {
         return props.getPeers().stream()
@@ -42,9 +42,9 @@ public class KvClientAutoConfiguration {
     }
 
     /**
-     * Validates required client properties.
+     * 校验客户端必要配置。
      *
-     * @param props client properties
+     * @param props 客户端配置属性
      */
     private void validateProperties(KvClientProperties props) {
         if (props.getPeers() == null || props.getPeers().isEmpty()) {
