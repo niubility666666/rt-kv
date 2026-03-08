@@ -13,9 +13,9 @@
 - 基于 Raft 共识协议（Apache Ratis）
 - 支持多节点一致性复制
 - 可插拔 KV 状态机（StateMachine）
-- 本地文件持久化存储
+- 可切换存储后端（MySQL / Redis / 本地 DB(H2) / 本地文件 / Elasticsearch / MongoDB）
 - 清晰的 Client / Server / App 分层
-- 新增 Common 协议层，统一命令格式与 GroupId
+- 统一命令协议层，客户端与服务端共享
 
 ## 模块结构
 
@@ -27,29 +27,18 @@ rt-kv
 └── rt-kv-app       # HTTP 网关示例应用
 ```
 
-## 关键优化（本次）
-
-- 修复 client/server `RaftGroupId` 不一致问题
-- 修复 `DELETE` 使用只读请求的问题（改为写请求）
-- 抽离统一命令协议（`KvCommand` + `KvCommandCodec`）
-- StateMachine 区分写路径（`applyTransaction`）与读路径（`query`）
-- 文件存储 key 改为 Base64 文件名，避免非法字符与路径风险
-- 增加 service 层，controller 只负责 HTTP 映射
-- 补齐核心类和方法 Javadoc 注释
-
 ## 构建
 
 ```bash
-mvn clean test
 mvn clean package -DskipTests
 ```
 
 ## 启动示例
 
-启动 3 个 server 节点（分别修改 `kv.node-id` 与 `kv.data-dir`）：
+启动 server：
 
 ```bash
-java -jar rt-kv-server/target/rt-kv-server.jar --spring.config.location=classpath:/application.yml
+java -jar rt-kv-server/target/rt-kv-server.jar
 ```
 
 启动 app：
@@ -58,11 +47,87 @@ java -jar rt-kv-server/target/rt-kv-server.jar --spring.config.location=classpat
 java -jar rt-kv-app/target/rt-kv-app.jar
 ```
 
+## 存储后端配置
+
+在 `rt-kv-server/src/main/resources/application.yml` 中通过 `kv.storage.type` 选择：
+
+- `file`
+- `mysql`
+- `redis`
+- `local_db`
+- `elasticsearch`
+- `mongodb`
+
+示例：
+
+```yaml
+kv:
+  storage:
+    type: mysql
+    mysql:
+      url: jdbc:mysql://127.0.0.1:3306/rt_kv?useSSL=false&serverTimezone=UTC
+      username: root
+      password: root
+      table: rt_kv_store
+```
+
+```yaml
+kv:
+  storage:
+    type: redis
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password:
+      database: 0
+      key-prefix: rt-kv:
+```
+
+```yaml
+kv:
+  storage:
+    type: local_db
+    local-db:
+      url: jdbc:h2:file:./data/n1/kv-localdb;MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE
+      username: sa
+      password:
+      table: rt_kv_store
+```
+
+```yaml
+kv:
+  storage:
+    type: file
+    file:
+      dir: ./data/n1/kv-file
+```
+
+```yaml
+kv:
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      endpoint: http://127.0.0.1:9200
+      username:
+      password:
+      index: rt_kv_store
+```
+
+```yaml
+kv:
+  storage:
+    type: mongodb
+    mongodb:
+      uri: mongodb://127.0.0.1:27017
+      database: rt_kv
+      collection: kv_store
+```
+
 ## HTTP API（rt-kv-app）
 
-- 写入: `POST /kv/{key}`，Body 为 value 文本
-- 读取: `GET /kv/{key}`
-- 删除: `DELETE /kv/{key}`
+- 写入：`POST /kv/{key}`，Body 为 value 文本
+- 读取：`GET /kv/{key}`
+- 删除：`DELETE /kv/{key}`
 
 示例：
 
@@ -71,14 +136,6 @@ curl -X POST "http://localhost:8080/kv/user:1" -d "Tom"
 curl "http://localhost:8080/kv/user:1"
 curl -X DELETE "http://localhost:8080/kv/user:1"
 ```
-
-## Roadmap
-
-- Snapshot 支持
-- Watch 机制
-- gRPC API
-- RocksDB 存储后端
-- 集群动态扩缩容
 
 ## License
 

@@ -1,6 +1,6 @@
 kv:
-  node-id: n1  # 集群跑别的服务时候这个要改为n2,n3对应的
-  data-dir: ./data/n1 # 集群跑别的服务时候这个要改为n2,n3对应的
+  node-id: n1
+  data-dir: ./data/n1
   peers:
     - id: n1
       address: localhost:8081
@@ -8,3 +8,42 @@ kv:
       address: localhost:8082
     - id: n3
       address: localhost:8083
+
+  storage:
+    # 可选值: file / mysql / redis / local_db / elasticsearch / mongodb
+    type: file
+
+    file:
+      # 为空时默认使用: kv.data-dir/kv.node-id/kv-file
+      dir: ./data/n1/kv-file
+
+    mysql:
+      url: jdbc:mysql://127.0.0.1:3306/rt_kv?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false
+      username: root
+      password: root
+      table: rt_kv_store
+
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password:
+      database: 0
+      key-prefix:
+
+    local-db:
+      # 为空时默认使用 kv.data-dir 下的 H2 文件数据库
+      url: jdbc:h2:file:./data/n1/kv-localdb;MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE
+      username: sa
+      password:
+      table: rt_kv_store
+
+    elasticsearch:
+      endpoint: http://127.0.0.1:9200
+      username:
+      password:
+      index: rt_kv_store
+
+    mongodb:
+      uri: mongodb://127.0.0.1:27017
+      database: rt_kv
+      collection: kv_store

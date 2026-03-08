@@ -8,7 +8,6 @@ import org.apache.ratis.protocol.RaftPeerId;
 import org.apache.ratis.server.RaftServer;
 import org.rt.common.protocol.RaftGroupConstants;
 import org.rt.machine.KvStateMachine;
-import org.rt.storage.FileLogStorage;
 import org.rt.storage.KvStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -28,15 +26,18 @@ public class RaftServerBootstrap implements SmartLifecycle {
     private static final Logger LOG = LoggerFactory.getLogger(RaftServerBootstrap.class);
 
     private final KvNodeProperties props;
+    private final KvStorage kvStorage;
     private volatile RaftServer raftServer;
 
     /**
      * 创建引导实例。
      *
      * @param props 节点与集群配置
+     * @param kvStorage 已装配的 KV 存储实现
      */
-    public RaftServerBootstrap(KvNodeProperties props) {
+    public RaftServerBootstrap(KvNodeProperties props, KvStorage kvStorage) {
         this.props = props;
+        this.kvStorage = kvStorage;
     }
 
     /**
@@ -52,7 +53,8 @@ public class RaftServerBootstrap implements SmartLifecycle {
             validateConfiguration();
             raftServer = buildRaftServer();
             raftServer.start();
-            LOG.info("Raft server started, nodeId={}, dataDir={}", props.getNodeId(), props.getDataDir());
+            LOG.info("Raft server started, nodeId={}, storageType={}",
+                    props.getNodeId(), kvStorage.getClass().getSimpleName());
         } catch (Exception e) {
             throw new IllegalStateException("Failed to start Raft server", e);
         }
@@ -118,7 +120,6 @@ public class RaftServerBootstrap implements SmartLifecycle {
      * 根据配置构建 RaftServer。
      *
      * @return 可直接启动的 RaftServer 实例
-     * @throws IOException 存储初始化失败时抛出
      */
     private RaftServer buildRaftServer() throws IOException {
         RaftPeerId selfId = RaftPeerId.valueOf(props.getNodeId());
@@ -127,13 +128,11 @@ public class RaftServerBootstrap implements SmartLifecycle {
         RaftGroupId groupId = RaftGroupId.valueOf(RaftGroupConstants.KV_GROUP_UUID);
         RaftGroup group = RaftGroup.valueOf(groupId, peers);
 
-        KvStorage storage = new FileLogStorage(Paths.get(props.getDataDir(), props.getNodeId()));
-
         return RaftServer.newBuilder()
                 .setServerId(selfId)
                 .setGroup(group)
                 .setProperties(new RaftProperties())
-                .setStateMachineRegistry(raftGroupId -> new KvStateMachine(storage))
+                .setStateMachineRegistry(raftGroupId -> new KvStateMachine(kvStorage))
                 .build();
     }
 
@@ -164,6 +163,9 @@ public class RaftServerBootstrap implements SmartLifecycle {
         }
         if (props.getPeers() == null || props.getPeers().isEmpty()) {
             throw new IllegalArgumentException("kv.peers must not be empty");
+        }
+        if (props.getStorage() == null || props.getStorage().getType() == null) {
+            throw new IllegalArgumentException("kv.storage.type must not be null");
         }
     }
 }
